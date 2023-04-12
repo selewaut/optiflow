@@ -142,3 +142,39 @@ class EOQProduction(OrderQuantityModel):
         )
         self.cost = cost
         return cost
+
+
+class EOQBackorders(OrderQuantityModel):
+    """Economic Order Quantity with backorders (EOQ) model for inventory optimization.
+
+    This class implements the EOQ model with backorders, which calculates the order quantity
+    that minimizes the total cost of ordering and holding inventory.
+    """
+
+    def __init__(self, ordering_cost, holding_cost, stockout_cost):
+        self.ordering_cost = ordering_cost
+        self.holding_cost = holding_cost
+        self.stockout_cost = stockout_cost
+        self.critical_ratio = stockout_cost / (holding_cost + stockout_cost)
+        self.eoq = None
+        self.cost = None
+        self.backorders = None
+
+    def calculate_order_quantities(self, demand):
+        eoq = np.sqrt(
+            2
+            * self.ordering_cost
+            * demand
+            * (self.holding_cost + self.stockout_cost)
+            / (self.holding_cost * self.stockout_cost)
+        )
+        self.eoq = eoq
+
+        b = (1 - self.critical_ratio) * eoq
+        optimal_cost = self.total_cost(demand, Q=eoq)
+        return eoq, optimal_cost, b
+
+    def total_cost(self, demand, Q, B):
+        cost = demand / Q * self.ordering_cost + ((Q - B) ** 2) / (2 * Q) *self.holding_cost + (B**2)/2(Q) * self.stockout_cost
+        self.cost = cost
+        return cost
