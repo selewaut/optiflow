@@ -1,5 +1,5 @@
 import unittest
-from optiflow.single_echelon_models._eoq import EOQ
+from optiflow.baseline.single_echelon_models._eoq import EOQ
 import numpy as np
 
 class EOQTest(unittest.TestCase):
