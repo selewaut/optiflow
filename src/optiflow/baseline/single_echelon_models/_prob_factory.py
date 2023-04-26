@@ -29,3 +29,5 @@ class DistributionFactory:
             return self.distributions[distribution_name]
         except KeyError:
             raise ValueError('Invalid distribution name.')
+        
+DIST_FACTORY = DistributionFactory()
