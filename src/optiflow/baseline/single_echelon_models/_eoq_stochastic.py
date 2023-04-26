@@ -1,19 +1,22 @@
-from optiflow.base.single_echelon_optimization.order_model import OrderQuantityModel
-from optiflow.baseline.single_echelon_models._prob_factory import get_distribution
 import numpy as np
+
+from optiflow.base.single_echelon_optimization.order_model import \
+    OrderQuantityModel
+from optiflow.baseline.single_echelon_models._prob_factory import \
+    DIST_FACTORY
 
 
 # generate class dependant on OrderQuantityModel that considers stochastic demand
-class StochasticDemandOrderQuantityModel(OrderQuantityModel):
+class EOQStochastic(OrderQuantityModel):
     def __init__(self, ordering_cost, holding_cost, demand_distribution='norm',  n_periods=1, **kwargs):
         self.ordering_cost = ordering_cost
         self.holding_cost = holding_cost
-        self.demand_distribution = get_distribution(demand_distribution)
+        self.demand_distribution =DIST_FACTORY.get_distribution(demand_distribution)
         self.distribution = demand_distribution
         self.n_periods = n_periods
 
 
-    def reorder_point(self, p, **kwargs):
+    def reorder_point(self, service_level, **kwargs):
         """
         Estimates the quantile function of the distribution at the specified probability level.
         
@@ -23,21 +26,21 @@ class StochasticDemandOrderQuantityModel(OrderQuantityModel):
         """
         # Estimate quantile at which service level is met. 
         # This inventory value should be the same as CS + SS
-        return self.distribution.ppf(p, **kwargs)
+        return self.demand_distribution.ppf(service_level, **kwargs)
     
 
-    def expected_service_level(self, **kwargs):
+    def expected_service_level(self, initial_inventory,  **kwargs):
         """
         Estimates the expected service level. Calculates
         """
         # estimate cumulative distribution given distribution parameters and initial cycle inventory value.
-        return self.distribution.cdf(**kwargs)
+        return self.demand_distribution.cdf(x=initial_inventory, **kwargs)
     
     def safety_stock(self, service_level: float, demand: np.array):
         if self.demand_distribution == 'norm':
             sigma_d = np.std(demand)
             # safety normal stock
-            ss = self.distribution.ppf(service_level) * sigma_d * np.sqrt(self.n_periods)
+            ss = self.demand_distribution.ppf(service_level) * sigma_d * np.sqrt(self.n_periods)
             # cycle normal stock.
             cs = np.mean(demand)
             return ss, cs
