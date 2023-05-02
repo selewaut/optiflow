@@ -7,7 +7,7 @@ from optiflow.baseline.single_echelon_models._prob_factory import \
 
 
 # generate class dependant on OrderQuantityModel that considers stochastic demand
-class EOQStochastic(OrderQuantityModel):
+class EOQStochasticDemand(OrderQuantityModel):
     def __init__(self, ordering_cost, holding_cost, demand_distribution='norm',  n_periods=1, **kwargs):
         self.ordering_cost = ordering_cost
         self.holding_cost = holding_cost
@@ -78,3 +78,13 @@ class EOQStochastic(OrderQuantityModel):
         cost = self.holding_cost * Q / 2 + self.ordering_cost * np.sum(demand) / Q
         self.cost = cost
         return cost
+    
+
+
+class EOQStochasticLeadtime(OrderQuantityModel):
+    def __init__(self, ordering_cost, holding_cost, demand_distribution='norm',  n_periods=1, **kwargs):
+        self.ordering_cost = ordering_cost
+        self.holding_cost = holding_cost
+        self.demand_distribution =DIST_FACTORY.get_distribution(demand_distribution)
+        self.distribution = demand_distribution
+        self.n_periods = n_periods
