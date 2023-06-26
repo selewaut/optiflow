@@ -52,9 +52,16 @@ class EOQ(OrderQuantityModel):
         -------
         order_quantities : array-like of shape (n_periods,)
             The order quantities for each of the next n periods.
+
+        
+        EOQ model:
+        - Optimal Quantity: Q^* = \sqrt{\frac{2 \cdot D \cdot S}{H}}
+        
         """
+       
         eoq = np.sqrt((2 * self.ordering_cost * np.sum(demand)) / self.holding_cost)
         self.eoq = eoq
+        
         optimal_cost = self.total_cost(demand, Q=eoq)
         return eoq, optimal_cost
 
@@ -149,6 +156,12 @@ class EOQBackorders(OrderQuantityModel):
 
     This class implements the EOQ model with backorders, which calculates the order quantity
     that minimizes the total cost of ordering and holding inventory.
+
+    - Economic Quantity: 
+        Q^* = \sqrt{\frac{2 \cdot D \cdot (S+H)}{S \cdot H}}
+    - Cost Formula: 
+        C(Q,B) = \frac{D}{Q} \cdot S + \frac{(Q-B)^2}{2Q} \cdot H + \frac{B^2}{2Q} \cdot P
+        
     """
 
     def __init__(self, ordering_cost, holding_cost, stockout_cost):
